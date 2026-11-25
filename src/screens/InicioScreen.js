@@ -172,29 +172,18 @@ export default function InicioScreen({ navigation }) {
                 </Text>
               </TouchableOpacity>
 
-              <View style={styles.rodapeCard}>
-                <TouchableOpacity
-                  style={styles.botaoSortear}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  onPress={sortearPokemon}
-                >
-                  <MaterialIcons name="refresh" size={18} color="#FFFFFF" />
-                  <Text style={styles.textoBotaoSortear}>Sortear</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  activeOpacity={1}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  onPress={alternarFavorito}
-                >
-                  <MaterialIcons
-                    name={favorito ? 'star' : 'star-border'}
-                    size={30}
-                    color={favorito ? '#F59E0B' : '#94A3B8'}
-                  />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={styles.botaoFavorito}
+                activeOpacity={1}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={alternarFavorito}
+              >
+                <MaterialIcons
+                  name={favorito ? 'star' : 'star-border'}
+                  size={30}
+                  color={favorito ? '#F59E0B' : '#94A3B8'}
+                />
+              </TouchableOpacity>
             </View>
           ) : null}
         </View>
@@ -319,13 +308,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#1E293B',
-    marginBottom: 16,
+    marginBottom: 4,
   },
-  rodapeCard: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  botaoFavorito: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
   },
   botaoSortear: {
     flexDirection: 'row',
