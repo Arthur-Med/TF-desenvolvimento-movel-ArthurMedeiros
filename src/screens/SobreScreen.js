@@ -1,68 +1,88 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
 
-export default function SobreScreen({ navigation }) {
+export default function SobreScreen() {
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View style={styles.card}>
-        <MaterialIcons name="info-outline" size={48} color="#DC0A2D" />
-        <Text style={styles.titulo}>Sobre o App</Text>
-        <Text style={styles.descricao}>
-          Esta tela será construída na próxima etapa do projeto.
-        </Text>
+    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.titulo}>Pokedex e Batalha</Text>
+          <Text style={styles.descricao}>
+            Aplicativo de Pokédex da 1ª geração. Permite explorar os 151
+            Pokémon, filtrar por tipo, consultar detalhes, salvar nos
+            favoritos e simular batalhas.
+          </Text>
+        </View>
 
-        <TouchableOpacity
-          style={styles.botao}
-          activeOpacity={0.7}
-          onPress={() => navigation.navigate('Inicio')}
-        >
-          <Text style={styles.textoBotao}>Voltar para o Início</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.card}>
+          <Text style={styles.label}>Criador</Text>
+          <Text style={styles.valor}>Arthur José Barbosa Medeiros</Text>
+
+          <View style={styles.separador} />
+
+          <Text style={styles.label}>Matéria</Text>
+          <Text style={styles.valor}>Desenvolvimento Móvel</Text>
+
+          <View style={styles.separador} />
+
+          <Text style={styles.label}>Tecnologias Utilizadas</Text>
+          <Text style={styles.valor}>
+            React Native, Expo, React Navigation, AsyncStorage e Fetch API
+          </Text>
+
+          <View style={styles.separador} />
+
+          <Text style={styles.label}>API</Text>
+          <Text style={styles.valor}>
+            Dados e imagens fornecidos pela PokéAPI v2 (pokeapi.co)
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+  },
+  container: {
+    padding: 16,
   },
   card: {
-    width: '100%',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
+    padding: 18,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   titulo: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#1E293B',
-    marginTop: 12,
+    color: '#DC0A2D',
+    marginBottom: 8,
   },
   descricao: {
     fontSize: 14,
-    color: '#64748B',
-    textAlign: 'center',
-    marginTop: 6,
-    marginBottom: 20,
+    color: '#475569',
+    lineHeight: 22,
   },
-  botao: {
-    backgroundColor: '#DC0A2D',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-  },
-  textoBotao: {
-    color: '#FFFFFF',
+  label: {
+    fontSize: 13,
     fontWeight: 'bold',
-    fontSize: 14,
+    color: '#64748B',
+  },
+  valor: {
+    fontSize: 15,
+    color: '#1E293B',
+    marginTop: 4,
+    lineHeight: 22,
+  },
+  separador: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 12,
   },
 });
