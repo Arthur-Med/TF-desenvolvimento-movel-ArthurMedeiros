@@ -1,12 +1,37 @@
-import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { CORES_TIPOS } from '../coresTipos';
+
+const cacheTipos = {};
 
 function primeiraLetraMaiuscula(texto) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-// Componente reutilizável de card da Pokédex
 export default function CardPokemon(props) {
   const { pokemon, onPress, style } = props;
+  const [tipos, setTipos] = useState(cacheTipos[pokemon.id] || []);
+
+  useEffect(() => {
+    if (cacheTipos[pokemon.id]) {
+      setTipos(cacheTipos[pokemon.id]);
+      return;
+    }
+
+    let ativo = true;
+    fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`)
+      .then((res) => res.json())
+      .then((dados) => {
+        const listaTipos = dados.types.map((t) => t.type.name);
+        cacheTipos[pokemon.id] = listaTipos;
+        if (ativo) setTipos(listaTipos);
+      })
+      .catch(() => {});
+
+    return () => {
+      ativo = false;
+    };
+  }, [pokemon.id]);
 
   return (
     <TouchableOpacity
@@ -14,9 +39,25 @@ export default function CardPokemon(props) {
       activeOpacity={0.7}
       onPress={onPress}
     >
-      <Text style={styles.numero}>
-        #{String(pokemon.id).padStart(3, '0')}
-      </Text>
+      <View style={styles.topoCard}>
+        <Text style={styles.numero}>
+          #{String(pokemon.id).padStart(3, '0')}
+        </Text>
+
+        <View style={styles.listaTipos}>
+          {tipos.map((t) => (
+            <View
+              key={t}
+              style={[
+                styles.badgeTipo,
+                { backgroundColor: CORES_TIPOS[t] || '#64748B' },
+              ]}
+            >
+              <Text style={styles.textoTipo}>{primeiraLetraMaiuscula(t)}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
 
       <Image
         source={{ uri: pokemon.imagem }}
@@ -42,11 +83,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
+  topoCard: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
   numero: {
-    alignSelf: 'flex-end',
     fontSize: 12,
     fontWeight: 'bold',
     color: '#64748B',
+  },
+  listaTipos: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    gap: 4,
+    marginLeft: 4,
+  },
+  badgeTipo: {
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+  },
+  textoTipo: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   imagem: {
     width: 96,

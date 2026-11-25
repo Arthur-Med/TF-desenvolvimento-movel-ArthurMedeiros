@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import BotaoAtalho from '../components/BotaoAtalho';
+import { CORES_TIPOS } from '../coresTipos';
 
 function primeiraLetraMaiuscula(texto) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -42,7 +43,7 @@ export default function InicioScreen({ navigation }) {
           imagem:
             dados.sprites.other['official-artwork'].front_default ||
             dados.sprites.front_default,
-          tipo: dados.types[0].type.name,
+          tipos: dados.types.map((t) => t.type.name),
         };
         setPokemon(pokemonFormatado);
       })
@@ -62,14 +63,12 @@ export default function InicioScreen({ navigation }) {
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.bannerPokedex}>
-          <View style={styles.linhaLuzes}>
-            <View style={styles.lenteAzul} />
-            <View style={[styles.luzPequena, { backgroundColor: '#EF4444' }]} />
-            <View style={[styles.luzPequena, { backgroundColor: '#FACC15' }]} />
-            <View style={[styles.luzPequena, { backgroundColor: '#22C55E' }]} />
-          </View>
-
-          <Text style={styles.tituloBanner}>Pokédex Batalha</Text>
+          <Image
+            source={require('../../assets/pokedex.png')}
+            style={styles.imagemPokedex}
+            resizeMode="contain"
+          />
+          <Text style={styles.tituloBanner}>Pokedex e Batalha</Text>
         </View>
 
         <Text style={styles.tituloSecao}>Pokémon em Destaque do Dia</Text>
@@ -98,10 +97,20 @@ export default function InicioScreen({ navigation }) {
                 <Text style={styles.numeroPokemon}>
                   #{String(pokemon.id).padStart(3, '0')}
                 </Text>
-                <View style={styles.badgeTipo}>
-                  <Text style={styles.textoTipo}>
-                    {primeiraLetraMaiuscula(pokemon.tipo)}
-                  </Text>
+                <View style={styles.listaTipos}>
+                  {pokemon.tipos.map((t) => (
+                    <View
+                      key={t}
+                      style={[
+                        styles.badgeTipo,
+                        { backgroundColor: CORES_TIPOS[t] || '#64748B' },
+                      ]}
+                    >
+                      <Text style={styles.textoTipo}>
+                        {primeiraLetraMaiuscula(t)}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
               </View>
 
@@ -129,21 +138,15 @@ export default function InicioScreen({ navigation }) {
           ) : null}
         </View>
 
-        <Text style={styles.tituloSecao}>Atalhos Rápidos</Text>
-
         <BotaoAtalho
-          titulo="Abrir Pokédex"
-          subtitulo="Consulte os Pokémon, tipos e detalhes"
-          icone="catching-pokemon"
-          corIcone="#DC0A2D"
+          titulo="Pokédex"
+          cor="#DC0A2D"
           onPress={() => navigation.navigate('Pokedex')}
         />
 
         <BotaoAtalho
-          titulo="Arena de Batalha"
-          subtitulo="Escolha seus Pokémon e simule um combate"
-          icone="flash-on"
-          corIcone="#F59E0B"
+          titulo="Batalhar"
+          cor="#F59E0B"
           onPress={() => navigation.navigate('Batalha')}
         />
       </ScrollView>
@@ -161,48 +164,31 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   bannerPokedex: {
-    backgroundColor: '#DC0A2D',
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 22,
-  },
-  linhaLuzes: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 14,
-  },
-  lenteAzul: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#38BDF8',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-    marginRight: 10,
-  },
-  luzPequena: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#FFFFFF',
-    marginRight: 6,
+    borderColor: '#E2E8F0',
+    marginBottom: 22,
+  },
+  imagemPokedex: {
+    width: 110,
+    height: 85,
+    marginRight: 14,
   },
   tituloBanner: {
-    fontSize: 24,
+    flex: 1,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  subtituloBanner: {
-    fontSize: 14,
-    color: '#FEE2E2',
-    marginTop: 6,
-    lineHeight: 20,
+    color: '#1E293B',
   },
   tituloSecao: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1E293B',
+    textAlign: 'center',
     marginBottom: 10,
   },
   cardDestaque: {
@@ -244,8 +230,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#64748B',
   },
+  listaTipos: {
+    flexDirection: 'row',
+    gap: 6,
+  },
   badgeTipo: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: '#64748B',
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 20,
@@ -253,7 +243,7 @@ const styles = StyleSheet.create({
   textoTipo: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#DC0A2D',
+    color: '#FFFFFF',
   },
   imagemPokemon: {
     width: 150,

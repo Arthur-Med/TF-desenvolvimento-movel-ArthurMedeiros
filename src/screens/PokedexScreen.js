@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CardPokemon from '../components/CardPokemon';
+import { CORES_TIPOS } from '../coresTipos';
 
 const LIMITE_PAGINA = 20;
 const TOTAL_GEN1 = 151;
@@ -151,7 +152,7 @@ export default function PokedexScreen({ navigation }) {
       .finally(() => setIsLoading(false));
   };
 
-  // Filtra automaticamente conforme o usuário digita (nome ou número)
+  // live search
   const termo = busca.trim().toLowerCase().replace('#', '');
   const baseLista =
     tipo === 'todos' && termo !== '' && todosGen1.length > 0 ? todosGen1 : pokemons;
@@ -176,16 +177,23 @@ export default function PokedexScreen({ navigation }) {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listaTipos}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.botaoTipo, tipo === item.id && styles.botaoTipoAtivo]}
-              onPress={() => filtrarPorTipo(item.id)}
-            >
-              <Text style={[styles.textoTipo, tipo === item.id && styles.textoTipoAtivo]}>
-                {item.nome}
-              </Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }) => {
+            const ativo = tipo === item.id;
+            const corAtiva = CORES_TIPOS[item.id] || '#DC0A2D';
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.botaoTipo,
+                  ativo && { backgroundColor: corAtiva, borderColor: corAtiva },
+                ]}
+                onPress={() => filtrarPorTipo(item.id)}
+              >
+                <Text style={[styles.textoTipo, ativo && styles.textoTipoAtivo]}>
+                  {item.nome}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
         />
       </View>
 
