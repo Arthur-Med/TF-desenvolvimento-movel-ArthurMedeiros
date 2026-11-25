@@ -9,7 +9,7 @@ function primeiraLetraMaiuscula(texto) {
 }
 
 export default function CardPokemon(props) {
-  const { pokemon, onPress, style } = props;
+  const { pokemon, onPress, onRemover, style } = props;
   const [tipos, setTipos] = useState(cacheTipos[pokemon.id] || []);
 
   useEffect(() => {
@@ -68,6 +68,16 @@ export default function CardPokemon(props) {
       <Text style={styles.nome} numberOfLines={1}>
         {primeiraLetraMaiuscula(pokemon.nome)}
       </Text>
+
+      {onRemover ? (
+        <TouchableOpacity
+          style={styles.botaoRemover}
+          activeOpacity={0.7}
+          onPress={onRemover}
+        >
+          <Text style={styles.textoRemover}>Remover</Text>
+        </TouchableOpacity>
+      ) : null}
     </TouchableOpacity>
   );
 }
@@ -121,5 +131,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     color: '#1E293B',
+  },
+  botaoRemover: {
+    marginTop: 8,
+    backgroundColor: '#DC0A2D',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  textoRemover: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 });

@@ -9,9 +9,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 import BotaoAtalho from '../components/BotaoAtalho';
 import { CORES_TIPOS } from '../coresTipos';
+
+const CHAVE_FAVORITOS = 'pokemons_favoritos';
 
 function primeiraLetraMaiuscula(texto) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -19,14 +22,20 @@ function primeiraLetraMaiuscula(texto) {
 
 export default function InicioScreen({ navigation }) {
   const [pokemon, setPokemon] = useState(null);
+  const [favorito, setFavorito] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const verificarFavorito = async (idPokemon) => {
+    const salvos = await AsyncStorage.getItem(CHAVE_FAVORITOS);
+    const lista = salvos ? JSON.parse(salvos) : [];
+    setFavorito(lista.some((item) => item.id === idPokemon));
+  };
 
   const sortearPokemon = () => {
     setIsLoading(true);
     setError(null);
 
-    // Sorteia o pokemon
     const idSorteado = Math.floor(Math.random() * 151) + 1;
 
     fetch(`https://pokeapi.co/api/v2/pokemon/${idSorteado}`)
@@ -46,6 +55,7 @@ export default function InicioScreen({ navigation }) {
           tipos: dados.types.map((t) => t.type.name),
         };
         setPokemon(pokemonFormatado);
+        verificarFavorito(dados.id);
       })
       .catch((err) => {
         setError(err.message);
@@ -58,6 +68,33 @@ export default function InicioScreen({ navigation }) {
   useEffect(() => {
     sortearPokemon();
   }, []);
+
+  useEffect(() => {
+    const sair = navigation.addListener('focus', () => {
+      if (pokemon) verificarFavorito(pokemon.id);
+    });
+    return sair;
+  }, [navigation, pokemon]);
+
+  const alternarFavorito = async () => {
+    const novoValor = !favorito;
+    setFavorito(novoValor);
+
+    const salvos = await AsyncStorage.getItem(CHAVE_FAVORITOS);
+    const lista = salvos ? JSON.parse(salvos) : [];
+    const semAtual = lista.filter((item) => item.id !== pokemon.id);
+
+    if (novoValor) {
+      const novo = {
+        id: pokemon.id,
+        nome: pokemon.nome,
+        imagem: pokemon.imagem,
+      };
+      await AsyncStorage.setItem(CHAVE_FAVORITOS, JSON.stringify([...semAtual, novo]));
+    } else {
+      await AsyncStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(semAtual));
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
@@ -114,26 +151,50 @@ export default function InicioScreen({ navigation }) {
                 </View>
               </View>
 
-              <Image
-                source={{ uri: pokemon.imagem }}
-                style={styles.imagemPokemon}
-                resizeMode="contain"
-              />
-
-              <Text style={styles.nomePokemon}>
-                {primeiraLetraMaiuscula(pokemon.nome)}
-              </Text>
-
               <TouchableOpacity
-                style={styles.botaoSortear}
+                style={styles.areaPokemon}
                 activeOpacity={0.7}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                onPress={sortearPokemon}
+                onPress={() =>
+                  navigation.navigate('Detalhes', {
+                    id: pokemon.id,
+                    nome: pokemon.nome,
+                  })
+                }
               >
-                <MaterialIcons name="refresh" size={18} color="#FFFFFF" />
-  
-                <Text style={styles.textoBotaoSortear}>Sortear outro Pokémon</Text>
+                <Image
+                  source={{ uri: pokemon.imagem }}
+                  style={styles.imagemPokemon}
+                  resizeMode="contain"
+                />
+
+                <Text style={styles.nomePokemon}>
+                  {primeiraLetraMaiuscula(pokemon.nome)}
+                </Text>
               </TouchableOpacity>
+
+              <View style={styles.rodapeCard}>
+                <TouchableOpacity
+                  style={styles.botaoSortear}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  onPress={sortearPokemon}
+                >
+                  <MaterialIcons name="refresh" size={18} color="#FFFFFF" />
+                  <Text style={styles.textoBotaoSortear}>Sortear</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={1}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  onPress={alternarFavorito}
+                >
+                  <MaterialIcons
+                    name={favorito ? 'star' : 'star-border'}
+                    size={30}
+                    color={favorito ? '#F59E0B' : '#94A3B8'}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           ) : null}
         </View>
@@ -245,6 +306,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  areaPokemon: {
+    alignItems: 'center',
+    width: '100%',
+  },
   imagemPokemon: {
     width: 150,
     height: 150,
@@ -254,41 +319,21 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#1E293B',
-    marginBottom: 25,
+    marginBottom: 16,
   },
-  separator: {
-    width: '100%',
-    height: 1,
-    backgroundColor: '#E2E8F0',
-    marginVertical: 14,
-  },
-  linhaAtributos: {
+  rodapeCard: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  boxAtributo: {
-    flex: 1,
     alignItems: 'center',
-  },
-  labelAtributo: {
-    fontSize: 12,
-    color: '#64748B',
-  },
-  valorAtributo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    marginTop: 2,
   },
   botaoSortear: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#DC0A2D',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     borderRadius: 10,
   },
   textoBotaoSortear: {

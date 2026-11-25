@@ -7,7 +7,7 @@ export default function BatalhaScreen({ navigation }) {
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.card}>
         <MaterialIcons name="flash-on" size={48} color="#F59E0B" />
-        <Text style={styles.titulo}>Arena de Batalha</Text>
+        <Text style={styles.titulo}>Batalhar</Text>
         <Text style={styles.descricao}>
           Esta tela será construída na próxima etapa do projeto.
         </Text>
