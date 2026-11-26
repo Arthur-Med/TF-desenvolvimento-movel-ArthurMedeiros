@@ -120,6 +120,7 @@ export default function BatalhaScreen({ navigation }) {
   const [superPocoes, setSuperPocoes] = useState(1);
   const [mensagem, setMensagem] = useState('');
   const [vencedor, setVencedor] = useState(null);
+  const [aguardando, setAguardando] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -148,6 +149,7 @@ export default function BatalhaScreen({ navigation }) {
     setPocoes(2);
     setSuperPocoes(1);
     setVencedor(null);
+    setAguardando(false);
 
     Promise.all([carregarLutador(idEscolhido), carregarLutador(idInimigo)]).then(
       ([pJogador, pInimigo]) => {
@@ -161,19 +163,23 @@ export default function BatalhaScreen({ navigation }) {
     );
   };
 
-  const turnoInimigo = (jogAtual, iniAtual, textoJogador) => {
-    const golpe = iniAtual.golpes[Math.floor(Math.random() * iniAtual.golpes.length)];
-    const { dano, aviso } = calcularDano(iniAtual, jogAtual, golpe.tipo);
-    const novoHp = Math.max(0, jogAtual.hp - dano);
+  const turnoInimigo = (jogAtual, iniAtual) => {
+    setAguardando(true);
 
-    setJogador({ ...jogAtual, hp: novoHp });
-    setMenuAcao('principal');
+    setTimeout(() => {
+      const golpe = iniAtual.golpes[Math.floor(Math.random() * iniAtual.golpes.length)];
+      const { dano, aviso } = calcularDano(iniAtual, jogAtual, golpe.tipo);
+      const novoHp = Math.max(0, jogAtual.hp - dano);
 
-    const fim = novoHp === 0 ? ' Você perdeu!' : '';
-    if (novoHp === 0) setVencedor('inimigo');
-    setMensagem(
-      `${textoJogador}\n${formatar(iniAtual.nome)} usou ${formatar(golpe.nome)} (-${dano} HP)!${aviso}${fim}`
-    );
+      setJogador({ ...jogAtual, hp: novoHp });
+      setAguardando(false);
+
+      const fim = novoHp === 0 ? '\nVocê perdeu!' : '';
+      if (novoHp === 0) setVencedor('inimigo');
+      setMensagem(
+        `${formatar(iniAtual.nome)} usou ${formatar(golpe.nome)} (-${dano} HP)!${aviso}${fim}`
+      );
+    }, 1500);
   };
 
   const atacar = (golpe) => {
@@ -182,16 +188,17 @@ export default function BatalhaScreen({ navigation }) {
     const iniAtual = { ...inimigo, hp: novoHp };
 
     setInimigo(iniAtual);
+    setMenuAcao('principal');
     const texto = `${formatar(jogador.nome)} usou ${formatar(golpe.nome)} (-${dano} HP)!${aviso}`;
 
     if (novoHp === 0) {
       setVencedor('jogador');
-      setMenuAcao('principal');
       setMensagem(`${texto}\nVitória! ${formatar(inimigo.nome)} desmaiou!`);
       return;
     }
 
-    turnoInimigo(jogador, iniAtual, texto);
+    setMensagem(texto);
+    turnoInimigo(jogador, iniAtual);
   };
 
   const usarItem = (nome, cura) => {
@@ -203,9 +210,14 @@ export default function BatalhaScreen({ navigation }) {
     if (nome === 'Poção') setPocoes(pocoes - 1);
     else setSuperPocoes(superPocoes - 1);
 
-    const jogAtual = { ...jogador, hp: Math.min(jogador.hpMax, jogador.hp + cura) };
+    const novoHp = Math.min(jogador.hpMax, jogador.hp + cura);
+    const recuperado = novoHp - jogador.hp;
+    const jogAtual = { ...jogador, hp: novoHp };
+
     setJogador(jogAtual);
-    turnoInimigo(jogAtual, inimigo, `Você usou ${nome} (+${cura} HP)!`);
+    setMenuAcao('principal');
+    setMensagem(`Você usou ${nome} (+${recuperado} HP)!`);
+    turnoInimigo(jogAtual, inimigo);
   };
 
   const termo = busca.trim().toLowerCase().replace('#', '');
@@ -266,13 +278,23 @@ export default function BatalhaScreen({ navigation }) {
         ) : menuAcao === 'principal' ? (
           <View style={styles.linha}>
             <TouchableOpacity
-              style={[styles.botaoMenu, { backgroundColor: '#DC2626' }]}
+              style={[
+                styles.botaoMenu,
+                { backgroundColor: '#DC2626' },
+                aguardando && styles.desativado,
+              ]}
+              disabled={aguardando}
               onPress={() => setMenuAcao('ataques')}
             >
               <Text style={styles.textoBotaoBranco}>ATACAR</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.botaoMenu, { backgroundColor: '#D97706' }]}
+              style={[
+                styles.botaoMenu,
+                { backgroundColor: '#D97706' },
+                aguardando && styles.desativado,
+              ]}
+              disabled={aguardando}
               onPress={() => setMenuAcao('itens')}
             >
               <Text style={styles.textoBotaoBranco}>ITEM</Text>
