@@ -34,7 +34,7 @@ export default function SobreScreen() {
 
           <Text style={styles.label}>API</Text>
           <Text style={styles.valor}>
-            Dados e imagens fornecidos pela PokéAPI v2 (pokeapi.co)
+           PokéAPI v2 (pokeapi.co)
           </Text>
         </View>
       </ScrollView>
